@@ -49,7 +49,7 @@ def abacus(Inclinaison, Alpha):
             Abacus_2_support[(i, alpha)] = []
     
     Theta = np.linspace(0, 2 * m.pi, 10000, endpoint=False) # For the numerical integration
-    B = np.linspace(0, 2, 100) # for the abacus
+    B = np.linspace(0, 3, 300) # for the abacus
     
     for b in B:
         R = r_s(b, Theta)
@@ -76,28 +76,28 @@ def abacus(Inclinaison, Alpha):
                     #continue
     
     # saving the data
-    my_path = os.path.abspath('C:/Users/Nathan/Documents/E - Toulouse/Cours/Gravitation/BE/')
+    # my_path = os.path.abspath('C:/Users/Nathan/Documents/E - Toulouse/Cours/Gravitation/BE/')
     
     my_file = 'Abacus_1' + '.pkl'
-    my_file = os.path.join(my_path, my_file)
+    # my_file = os.path.join(my_path, my_file)
     f = open(my_file, "wb")
     pickle.dump(Abacus_1, f)
     f.close()
     
     my_file = 'Abacus_1_support' + '.pkl'
-    my_file = os.path.join(my_path, my_file)
+    # my_file = os.path.join(my_path, my_file)
     f = open(my_file, "wb")
     pickle.dump(Abacus_1_support, f)
     f.close()
     
     my_file = 'Abacus_2' + '.pkl'
-    my_file = os.path.join(my_path, my_file)
+    # my_file = os.path.join(my_path, my_file)
     f = open(my_file, "wb")
     pickle.dump(Abacus_2, f)
     f.close()
     
     my_file = 'Abacus_2_support' + '.pkl'
-    my_file = os.path.join(my_path, my_file)
+    # my_file = os.path.join(my_path, my_file)
     f = open(my_file, "wb")
     pickle.dump(Abacus_2_support, f)
     f.close()
