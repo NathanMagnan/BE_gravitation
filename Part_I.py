@@ -4,7 +4,7 @@ import numpy as np
 
 import sys
 import os
-sys.path.append('C:/Users/Nathan/Documents/E - Toulouse/Cours/Gravitation/BE')
+sys.path.append('C:/Users/Nathan/Documents/E - Toulouse/Cours/Gravitation/B_gravitationE')
 import functions as functions
 
 import matplotlib.pyplot as plt
