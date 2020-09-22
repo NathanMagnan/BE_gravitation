@@ -95,23 +95,26 @@ if draw:
 ## Plotting the iso-radius
 
 plt.figure(figsize = (6, 6))
-plt.suptitle("Iso-radius for an observer at infinity. $r_{d} = 3 r_{s}$")
-plt.title("(primary images only)")
+plt.suptitle("Iso-radius for an observer at infinity. $i = \pi / 20$")
+plt.title("solid lines = primary images, dashed lines = secondary images")
 plt.xlabel("$x / r_{s}$")
 plt.ylabel("$y / r_{s}$")
 plt.xlim(-5, 5)
 plt.ylim(-5, 5)
 
-r_d = 3 # actually this is r_d / r_s
+inclinaison = Inclinaison[5]
 
-Inclinaisons = [Inclinaison[5], Inclinaison[25], Inclinaison[50], Inclinaison[75], Inclinaison[95]]
+R_d = [1.1, 1.5, 2, 2.5, 3] # actually this is r_d / r_s
 Colors = ['b', 'g', 'y', 'orange', 'r']
-Labels = ['$i = \epsilon$', '$i = \pi / 4$', '$i = \pi / 2$', '$i = 3 \pi / 4$', '$i = \pi - \epsilon$']
+Labels = ['$r_{d} / r_{s} = 1.1$', '$r_{d} / r_{s} = 1.5$', '$r_{d} / r_{s} = 2$', '$r_{d} / r_{s} = 2.5$', '$r_{d} / r_{s} = 3$']
 
 j = 0
-for inclinaison in Inclinaisons:
+for r_d in R_d:
     X, Y = functions.read_abacus(inclinaison, r_d, Alpha, Abacus_1, Abacus_1_support)
     plt.plot(X, Y, color = Colors[j], label = Labels[j])
+    
+    X, Y = functions.read_abacus(inclinaison, r_d, Alpha, Abacus_2, Abacus_2_support)
+    plt.plot(X, Y, color = Colors[j], linestyle =  '--')
     j += 1
 
 plt.legend()
