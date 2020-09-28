@@ -148,3 +148,58 @@ def read_abacus(i, r_d, Alpha, Abacus, Abacus_support):
         Y.append(y)
     
     return(X, Y)
+
+def redshift(i, r_d, alpha, b): # takes r_d / r_s as an entry, and gives the redshift as an output
+    a = np.sqrt(1 - 3 / (2 * r_d))**(-1)
+    b = 1 + (3 / (2 * r_d))**(3 / 2) * b * np.cos(i) * np.cos(alpha)
+    return(a * b - 1)
+
+def read_abacus_redshift(i, r_d, Alpha, Abacus, Abacus_support):
+    X = []
+    Y = []
+    Z = []
+    
+    for alpha in Alpha:
+        if (i < m.pi / 2): # we use the symmetry (i, alpha) <-> (pi / 2 - i, alpha + pi)
+            true_i = round(i, 4)
+            if ((alpha > - m.pi / 2) and (alpha < m.pi / 2)): # we use the symmetry alpha <-> 2 pi - alpha
+                true_alpha = round(alpha, 4)
+            elif (alpha < - m.pi / 2):
+                true_alpha = round(- m.pi - alpha, 4)
+            else:
+                true_alpha = round(m.pi - alpha, 4)
+        else:
+            true_i = round(m.pi - i, 4)
+            alpha_sym = - alpha
+            if ((alpha_sym > - m.pi / 2) and (alpha_sym < m.pi / 2)): # we use the symmetry alpha <-> 2 pi - alpha
+                true_alpha = round(alpha_sym, 4)
+            elif (alpha_sym < - m.pi / 2):
+                true_alpha = round(- m.pi - alpha_sym, 4)
+            else:
+                true_alpha = round(m.pi - alpha_sym, 4)
+                
+        Acceptable_rd = np.sort(Abacus_support[(true_i, true_alpha)])
+        
+        j = 0 # we look for the r_d in the abacus that is the closest to the goal
+        while ((Acceptable_rd[j] < r_d) and (j < len(Acceptable_rd) - 1)):
+            j += 1
+        
+        try : # we try to make a linear interpolation between the two closest r_d. If that is not possible, we take the closest r_d
+            r1 = Acceptable_rd[j - 1]
+            r2 = Acceptable_rd[j]
+            b1 = Abacus[(true_i, r1, true_alpha)]
+            b2 = Abacus[(true_i, r2, true_alpha)]
+            b = b2 * (r_d - r1) / (r2 - r1) + b1 * (r2 - r_d) / (r2 - r1)
+        except:
+            r = Acceptable_rd[j]
+            b = Abacus[(true_i, r, true_alpha)]
+        
+        z = redshift(i, r_d, alpha, b)
+        b = b * 3**(3/2) / 2 # translation from b / b_c to b / r_s, which makes more sense from a physics perspective
+        
+        x, y = np.cos(alpha) * b, np.sin(alpha) * b # translation from (alpha, b) to (x, y) in the observer's plane
+        X.append(x)
+        Y.append(y)
+        Z.append(z)
+        
+    return(X, Y, np.asarray(Z))
