@@ -1,10 +1,7 @@
 ## Imports
-
 import numpy as np
 import scipy.integrate as sc
 import math as m
-
-import os
 import pickle
 
 """ All number will start with small letters (a, b, c). All vectors or lists will start by a capital letter (A, B, C)"""
@@ -76,28 +73,22 @@ def abacus(Inclinaison, Alpha):
                     #continue
     
     # saving the data
-    my_path = os.path.abspath('C:/Users/Nathan/Documents/E - Toulouse/Cours/Astrophysique/Gravitation/BE_gravitation/')
-    
     my_file = 'Abacus_1' + '.pkl'
-    my_file = os.path.join(my_path, my_file)
     f = open(my_file, "wb")
     pickle.dump(Abacus_1, f)
     f.close()
     
     my_file = 'Abacus_1_support' + '.pkl'
-    my_file = os.path.join(my_path, my_file)
     f = open(my_file, "wb")
     pickle.dump(Abacus_1_support, f)
     f.close()
     
     my_file = 'Abacus_2' + '.pkl'
-    my_file = os.path.join(my_path, my_file)
     f = open(my_file, "wb")
     pickle.dump(Abacus_2, f)
     f.close()
     
     my_file = 'Abacus_2_support' + '.pkl'
-    my_file = os.path.join(my_path, my_file)
     f = open(my_file, "wb")
     pickle.dump(Abacus_2_support, f)
     f.close()
