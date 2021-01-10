@@ -45,8 +45,8 @@ def abacus(Inclinaison, Alpha):
     Abacus_2_support = {}
     for i in Inclinaison:
         for alpha in Alpha:
-            Abacus_1_support[(i, alpha)] = []
-            Abacus_2_support[(i, alpha)] = []
+            Abacus_1_support[(round(i, 4), round(alpha, 4))] = []
+            Abacus_2_support[(round(i, 4), round(alpha, 4))] = []
     
     Theta = np.linspace(0, 2 * m.pi, 10000, endpoint=False) # For the numerical integration
     B = np.linspace(0, 2, 100) # for the abacus
@@ -61,8 +61,8 @@ def abacus(Inclinaison, Alpha):
                 index = int(len(Theta) * theta_d / (2 * m.pi)) # index of this theta_d in the list Theta
                 r_d = R[index] # r_d corresponding to this (b, theta_d)
                 
-                Abacus_1[(i, r_d, alpha)] = b
-                Abacus_1_support[(i, alpha)].append(r_d)
+                Abacus_1[(round(i, 4), r_d, round(alpha, 4))] = b
+                Abacus_1_support[(round(i, 4), round(alpha, 4))].append(r_d)
                 
                 """secondary image, which might not exist"""
                 #try :
@@ -70,13 +70,13 @@ def abacus(Inclinaison, Alpha):
                 index = int(len(Theta) * theta_d / (2 * m.pi))
                 r_d = R[index]
                 
-                Abacus_2[(i, r_d, alpha)] = b
-                Abacus_2_support[(i, alpha)].append(r_d)
+                Abacus_2[(round(i, 4), r_d, round(alpha, 4))] = b
+                Abacus_2_support[(round(i, 4), round(alpha, 4))].append(r_d)
                 #except:
                     #continue
     
     # saving the data
-    my_path = os.path.abspath('C:/Users/Nathan/Documents/E - Toulouse/Cours/Gravitation/BE/')
+    my_path = os.path.abspath('C:/Users/Nathan/Documents/E - Toulouse/Cours/Astrophysique/Gravitation/BE_gravitation/')
     
     my_file = 'Abacus_1' + '.pkl'
     my_file = os.path.join(my_path, my_file)
@@ -107,7 +107,25 @@ def read_abacus(i, r_d, Alpha, Abacus, Abacus_support):
     Y = []
     
     for alpha in Alpha:
-        Acceptable_rd = np.sort(Abacus_support[(i, alpha)])
+        if (i < m.pi / 2): # we use the symmetry (i, alpha) <-> (pi / 2 - i, alpha + pi)
+            true_i = round(i, 4)
+            if ((alpha > - m.pi / 2) and (alpha < m.pi / 2)): # we use the symmetry alpha <-> 2 pi - alpha
+                true_alpha = round(alpha, 4)
+            elif (alpha < - m.pi / 2):
+                true_alpha = round(- m.pi - alpha, 4)
+            else:
+                true_alpha = round(m.pi - alpha, 4)
+        else:
+            true_i = round(m.pi - i, 4)
+            alpha_sym = - alpha
+            if ((alpha_sym > - m.pi / 2) and (alpha_sym < m.pi / 2)): # we use the symmetry alpha <-> 2 pi - alpha
+                true_alpha = round(alpha_sym, 4)
+            elif (alpha_sym < - m.pi / 2):
+                true_alpha = round(- m.pi - alpha_sym, 4)
+            else:
+                true_alpha = round(m.pi - alpha_sym, 4)
+                
+        Acceptable_rd = np.sort(Abacus_support[(true_i, true_alpha)])
         
         j = 0 # we look for the r_d in the abacus that is the closest to the goal
         while ((Acceptable_rd[j] < r_d) and (j < len(Acceptable_rd) - 1)):
@@ -116,12 +134,12 @@ def read_abacus(i, r_d, Alpha, Abacus, Abacus_support):
         try : # we try to make a linear interpolation between the two closest r_d. If that is not possible, we take the closest r_d
             r1 = Acceptable_rd[j - 1]
             r2 = Acceptable_rd[j]
-            b1 = Abacus[(i, r1, alpha)]
-            b2 = Abacus[(i, r2, alpha)]
+            b1 = Abacus[(true_i, r1, true_alpha)]
+            b2 = Abacus[(true_i, r2, true_alpha)]
             b = b2 * (r_d - r1) / (r2 - r1) + b1 * (r2 - r_d) / (r2 - r1)
         except:
             r = Acceptable_rd[j]
-            b = Abacus[(i, r, alpha)]
+            b = Abacus[(true_i, r, true_alpha)]
         
         b = b * 3**(3/2) / 2 # translation from b / b_c to b / r_s, which makes more sense from a physics perspective
         
@@ -130,3 +148,117 @@ def read_abacus(i, r_d, Alpha, Abacus, Abacus_support):
         Y.append(y)
     
     return(X, Y)
+
+def redshift(i, r_d, alpha, b): # takes r_d / r_s as an entry, and gives the redshift as an output
+    a = np.sqrt(1 - 3 / (2 * r_d))**(-1)
+    b = 1 + (3 / (2 * r_d))**(3 / 2) * b * np.cos(i) * np.cos(alpha)
+    return(a * b - 1)
+
+def read_abacus_redshift(i, r_d, Alpha, Abacus, Abacus_support):
+    X = []
+    Y = []
+    Z = []
+    
+    for alpha in Alpha:
+        if (i < m.pi / 2): # we use the symmetry (i, alpha) <-> (pi / 2 - i, alpha + pi)
+            true_i = round(i, 4)
+            if ((alpha > - m.pi / 2) and (alpha < m.pi / 2)): # we use the symmetry alpha <-> 2 pi - alpha
+                true_alpha = round(alpha, 4)
+            elif (alpha < - m.pi / 2):
+                true_alpha = round(- m.pi - alpha, 4)
+            else:
+                true_alpha = round(m.pi - alpha, 4)
+        else:
+            true_i = round(m.pi - i, 4)
+            alpha_sym = - alpha
+            if ((alpha_sym > - m.pi / 2) and (alpha_sym < m.pi / 2)): # we use the symmetry alpha <-> 2 pi - alpha
+                true_alpha = round(alpha_sym, 4)
+            elif (alpha_sym < - m.pi / 2):
+                true_alpha = round(- m.pi - alpha_sym, 4)
+            else:
+                true_alpha = round(m.pi - alpha_sym, 4)
+                
+        Acceptable_rd = np.sort(Abacus_support[(true_i, true_alpha)])
+        
+        j = 0 # we look for the r_d in the abacus that is the closest to the goal
+        while ((Acceptable_rd[j] < r_d) and (j < len(Acceptable_rd) - 1)):
+            j += 1
+        
+        try : # we try to make a linear interpolation between the two closest r_d. If that is not possible, we take the closest r_d
+            r1 = Acceptable_rd[j - 1]
+            r2 = Acceptable_rd[j]
+            b1 = Abacus[(true_i, r1, true_alpha)]
+            b2 = Abacus[(true_i, r2, true_alpha)]
+            b = b2 * (r_d - r1) / (r2 - r1) + b1 * (r2 - r_d) / (r2 - r1)
+        except:
+            r = Acceptable_rd[j]
+            b = Abacus[(true_i, r, true_alpha)]
+        
+        z = redshift(i, r_d, alpha, b)
+        b = b * 3**(3/2) / 2 # translation from b / b_c to b / r_s, which makes more sense from a physics perspective
+        
+        x, y = np.cos(alpha) * b, np.sin(alpha) * b # translation from (alpha, b) to (x, y) in the observer's plane
+        X.append(x)
+        Y.append(y)
+        Z.append(z)
+        
+    return(X, Y, np.asarray(Z))
+
+def flux(r_d): # actually r_d/ r_s
+    a = r_d**(-5 / 2) / (r_d - 3 / 2) # I'm pretty sure the bottom of this fraction should be x**(-3/2), but I have to ask the teacher.
+    b = np.sqrt(r_d) - np.sqrt(3)
+    c1 = (np.sqrt(r_d) + np.sqrt(3 / 2)) * (np.sqrt(2) - 1)
+    c2 = (np.sqrt(r_d) - np.sqrt(3 / 2)) * (np.sqrt(2) + 1)
+    d = np.sqrt(3/8) * np.log(c1 / c2)
+    return(a * (b + d))
+
+def read_abacus_flux(i, r_d, Alpha, Abacus, Abacus_support):
+    X = []
+    Y = []
+    F = []
+    
+    for alpha in Alpha:
+        if (i < m.pi / 2): # we use the symmetry (i, alpha) <-> (pi / 2 - i, alpha + pi)
+            true_i = round(i, 4)
+            if ((alpha > - m.pi / 2) and (alpha < m.pi / 2)): # we use the symmetry alpha <-> 2 pi - alpha
+                true_alpha = round(alpha, 4)
+            elif (alpha < - m.pi / 2):
+                true_alpha = round(- m.pi - alpha, 4)
+            else:
+                true_alpha = round(m.pi - alpha, 4)
+        else:
+            true_i = round(m.pi - i, 4)
+            alpha_sym = - alpha
+            if ((alpha_sym > - m.pi / 2) and (alpha_sym < m.pi / 2)): # we use the symmetry alpha <-> 2 pi - alpha
+                true_alpha = round(alpha_sym, 4)
+            elif (alpha_sym < - m.pi / 2):
+                true_alpha = round(- m.pi - alpha_sym, 4)
+            else:
+                true_alpha = round(m.pi - alpha_sym, 4)
+                
+        Acceptable_rd = np.sort(Abacus_support[(true_i, true_alpha)])
+        
+        j = 0 # we look for the r_d in the abacus that is the closest to the goal
+        while ((Acceptable_rd[j] < r_d) and (j < len(Acceptable_rd) - 1)):
+            j += 1
+        
+        try : # we try to make a linear interpolation between the two closest r_d. If that is not possible, we take the closest r_d
+            r1 = Acceptable_rd[j - 1]
+            r2 = Acceptable_rd[j]
+            b1 = Abacus[(true_i, r1, true_alpha)]
+            b2 = Abacus[(true_i, r2, true_alpha)]
+            b = b2 * (r_d - r1) / (r2 - r1) + b1 * (r2 - r_d) / (r2 - r1)
+        except:
+            r = Acceptable_rd[j]
+            b = Abacus[(true_i, r, true_alpha)]
+        
+        z = redshift(i, r_d, alpha, b)
+        f = flux(r_d) / (1 + z)**4
+        b = b * 3**(3/2) / 2 # translation from b / b_c to b / r_s, which makes more sense from a physics perspective
+        
+        x, y = np.cos(alpha) * b, np.sin(alpha) * b # translation from (alpha, b) to (x, y) in the observer's plane
+        X.append(x)
+        Y.append(y)
+        F.append(f)
+        
+    return(X, Y, np.asarray(F))
